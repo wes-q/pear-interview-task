@@ -20,7 +20,12 @@ const searchBook = async (bookTitle) => {
 };
 
 const displayBookInfo = async (book) => {
-    console.log(`Displaying ${book} info...`);
+    const description = book.description || "N/A";
+    const title = book.title || "N/A";
+    const authors = book.authors || "N/A";
+    console.log(`Title: ${title}`);
+    console.log(`Description: ${description}`);
+    console.log(`Authors: ${authors}`);
 };
 
 const main = async () => {
