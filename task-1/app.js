@@ -25,7 +25,29 @@ const displayBookInfo = async (book) => {
     const authors = book.authors || "N/A";
     console.log(`Title: ${title}`);
     console.log(`Description: ${description}`);
-    console.log(`Authors: ${authors}`);
+
+    const authorNames = await Promise.all(
+        authors.map(async (authorId) => {
+            return await getAuthorFullName(authorId);
+        })
+    );
+    console.log(`Authors: ${authorNames.join(", ") || "No authors found"}`);
+};
+
+const getAuthorFullName = async (authorId) => {
+    const response = await fetch(`${BASE_URL}/authors/${authorId}`);
+    const data = await response.json();
+    const firstName = data.firstName;
+    let middleInitial = data.middleInitial;
+    if (middleInitial === undefined) {
+        middleInitial = "";
+    } else {
+        middleInitial = `${middleInitial}.`;
+    }
+
+    const lastName = data.lastName;
+    const fullName = `${firstName} ${middleInitial}${lastName}`;
+    return fullName;
 };
 
 const main = async () => {
