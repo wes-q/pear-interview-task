@@ -1,4 +1,4 @@
-const readline = require("readline");
+const readline = require("node:readline");
 
 const BASE_URL = "https://ejditq67mwuzeuwrlp5fs3egwu0yhkjz.lambda-url.us-east-2.on.aws/api";
 
@@ -8,15 +8,23 @@ const rl = readline.createInterface({
 });
 
 const searchBook = async (bookTitle) => {
-    console.log(`Searching for ${bookTitle}...`);
-    const response = await fetch(`${BASE_URL}/books/search`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: bookTitle }),
-    });
+    try {
+        const response = await fetch(`${BASE_URL}/books/search`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title: bookTitle }),
+        });
 
-    const data = response.json();
-    return data;
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+
+        const data = response.json();
+        return data;
+    } catch (error) {
+        console.error("Error searching book:", error.message);
+        return null;
+    }
 };
 
 const displayBookInfo = async (book) => {
@@ -35,26 +43,29 @@ const displayBookInfo = async (book) => {
 };
 
 const getAuthorFullName = async (authorId) => {
-    const response = await fetch(`${BASE_URL}/authors/${authorId}`);
-    const data = await response.json();
-    const firstName = data.firstName;
-    let middleInitial = data.middleInitial;
-    if (middleInitial === undefined) {
-        middleInitial = "";
-    } else {
-        middleInitial = `${middleInitial}.`;
+    try {
+        const response = await fetch(`${BASE_URL}/authors/${authorId}`);
+        const data = await response.json();
+        const firstName = data.firstName;
+        let middleInitial = data.middleInitial;
+        if (middleInitial === undefined) {
+            middleInitial = "";
+        } else {
+            middleInitial = `${middleInitial}.`;
+        }
+        const lastName = data.lastName;
+        const fullName = `${firstName} ${middleInitial}${lastName}`;
+        return fullName;
+    } catch (error) {
+        console.error("Error fetching author name:", error.message);
+        return null;
     }
-
-    const lastName = data.lastName;
-    const fullName = `${firstName} ${middleInitial}${lastName}`;
-    return fullName;
 };
 
 const main = async () => {
-    rl.question("Enter a book title: ", async (userInput) => {
+    rl.question("Enter a book title ('Ctrl + C' to exit): ", async (userInput) => {
         const searchedBook = await searchBook(userInput.trim());
         if (searchedBook) {
-            console.log(searchedBook);
             await displayBookInfo(searchedBook);
         } else {
             console.log("Book not found.");
