@@ -7,20 +7,28 @@ const rl = readline.createInterface({
     output: process.stdout,
 });
 
-const searchBook = (book) => {
-    console.log(`Searching for ${book}...`);
-    return book;
+const searchBook = async (bookTitle) => {
+    console.log(`Searching for ${bookTitle}...`);
+    const response = await fetch(`${BASE_URL}/books/search`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: bookTitle }),
+    });
+
+    const data = response.json();
+    return data;
 };
 
-const displayBookInfo = (book) => {
+const displayBookInfo = async (book) => {
     console.log(`Displaying ${book} info...`);
 };
 
 const main = async () => {
     rl.question("Enter a book title: ", async (userInput) => {
-        const book = await searchBook(userInput.trim());
-        if (book) {
-            await displayBookInfo(book);
+        const searchedBook = await searchBook(userInput.trim());
+        if (searchedBook) {
+            console.log(searchedBook);
+            await displayBookInfo(searchedBook);
         } else {
             console.log("Book not found.");
         }
